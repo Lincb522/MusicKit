@@ -43,6 +43,47 @@ public extension QQMusicClient {
         return result[mid]?.stringValue
     }
 
+    // MARK: - 加密歌曲
+
+    /// 批量获取加密歌曲播放链接（返回 url + ekey）
+    ///
+    /// 加密文件需要使用 ekey 解密后才能播放，格式为 .mflac / .mgg
+    ///
+    /// ```swift
+    /// let urls = try await client.encryptedSongURLs(mids: "001yS0N31jFfpK", fileType: .flac)
+    /// // urls["001yS0N31jFfpK"] -> [url, ekey]
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - mids: 歌曲 mid 列表，逗号分隔
+    ///   - fileType: 加密文件类型
+    /// - Returns: mid -> [url, ekey] 的映射
+    func encryptedSongURLs(mids: String, fileType: EncryptedSongFileType = .flac) async throws -> [String: EncryptedSongURL] {
+        let raw: [String: JSON] = try await request("/song/get_song_urls", params: [
+            "mid": mids,
+            "file_type": "EncryptedSongFileType.\(fileType.rawValue)",
+        ])
+        var result: [String: EncryptedSongURL] = [:]
+        for (mid, value) in raw {
+            // 服务端返回 [url, ekey] 数组
+            if let arr = value.arrayValue, arr.count >= 2,
+               let url = arr[0]?.stringValue, let ekey = arr[1]?.stringValue {
+                result[mid] = EncryptedSongURL(url: url, ekey: ekey)
+            }
+        }
+        return result
+    }
+
+    /// 获取单首加密歌曲链接（便捷方法）
+    /// - Parameters:
+    ///   - mid: 歌曲 mid
+    ///   - fileType: 加密文件类型
+    /// - Returns: 加密歌曲 URL 信息，无法获取时返回 nil
+    func encryptedSongURL(mid: String, fileType: EncryptedSongFileType = .flac) async throws -> EncryptedSongURL? {
+        let result = try await encryptedSongURLs(mids: mid, fileType: fileType)
+        return result[mid]
+    }
+
     /// 获取试听链接
     /// - Parameters:
     ///   - mid: 歌曲 mid

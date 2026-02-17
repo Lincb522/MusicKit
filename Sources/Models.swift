@@ -306,6 +306,48 @@ public enum SongFileType: String, Sendable, CaseIterable {
     }
 }
 
+/// 加密歌曲文件类型（返回 url + ekey，需解密后播放）
+public enum EncryptedSongFileType: String, Sendable, CaseIterable {
+    /// 臻品母带 24Bit 192kHz (.mflac)
+    case master = "MASTER"
+    /// 臻品全景声 16Bit 44.1kHz (.mflac)
+    case atmos2 = "ATMOS_2"
+    /// 臻品音质 16Bit 44.1kHz (.mflac)
+    case atmos51 = "ATMOS_51"
+    /// FLAC 无损 (.mflac)
+    case flac = "FLAC"
+    /// OGG 640kbps (.mgg)
+    case ogg640 = "OGG_640"
+    /// OGG 320kbps (.mgg)
+    case ogg320 = "OGG_320"
+    /// OGG 192kbps (.mgg)
+    case ogg192 = "OGG_192"
+    /// OGG 96kbps (.mgg)
+    case ogg96 = "OGG_96"
+
+    /// 显示名称
+    public var displayName: String {
+        switch self {
+        case .master:  return "臻品母带 加密 (.mflac)"
+        case .atmos2:  return "臻品全景声 加密 (.mflac)"
+        case .atmos51: return "臻品音质 加密 (.mflac)"
+        case .flac:    return "FLAC 无损 加密 (.mflac)"
+        case .ogg640:  return "OGG 640kbps 加密 (.mgg)"
+        case .ogg320:  return "OGG 320kbps 加密 (.mgg)"
+        case .ogg192:  return "OGG 192kbps 加密 (.mgg)"
+        case .ogg96:   return "OGG 96kbps 加密 (.mgg)"
+        }
+    }
+}
+
+/// 加密歌曲 URL 结果
+public struct EncryptedSongURL: Sendable {
+    /// 下载链接
+    public let url: String
+    /// 解密密钥
+    public let ekey: String
+}
+
 /// 歌手地区
 public enum AreaType: String, Sendable {
     case all = "ALL"
