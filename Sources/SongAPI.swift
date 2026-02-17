@@ -67,7 +67,7 @@ public extension QQMusicClient {
         for (mid, value) in raw {
             // 服务端返回 [url, ekey] 数组
             if let arr = value.arrayValue, arr.count >= 2,
-               let url = arr[0]?.stringValue, let ekey = arr[1]?.stringValue {
+               let url = arr[0].stringValue, let ekey = arr[1].stringValue {
                 result[mid] = EncryptedSongURL(url: url, ekey: ekey)
             }
         }
