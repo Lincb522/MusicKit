@@ -140,4 +140,26 @@ public extension QQMusicClient {
     func musicGene(euin: String) async throws -> JSON {
         try await request("/user/get_music_gene", params: ["euin": euin])
     }
+
+    /// 获取最近播放记录
+    /// - Parameters:
+    ///   - num: 返回数量
+    ///   - page: 页码 (从 0 开始)
+    func listenRecent(num: Int = 50, page: Int = 0) async throws -> JSON {
+        try await request("/user/get_listen_recent", params: [
+            "num": String(num),
+            "page": String(page),
+        ])
+    }
+
+    /// 获取个人听歌排行
+    /// - Parameters:
+    ///   - period: 时间段 (0=近一周, 1=近一月, 2=近半年, 3=近一年)
+    ///   - num: 返回数量
+    func listenRank(period: Int = 0, num: Int = 50) async throws -> JSON {
+        try await request("/user/get_listen_rank", params: [
+            "period": String(period),
+            "num": String(num),
+        ])
+    }
 }

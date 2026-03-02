@@ -51,7 +51,7 @@ public enum QQMusicError: LocalizedError {
 // MARK: - JSON 动态类型
 
 /// 通用 JSON 值，用于处理动态结构的 API 响应
-public enum JSON: Decodable, CustomStringConvertible {
+public enum JSON: Decodable, CustomStringConvertible, Sendable {
     case string(String)
     case int(Int)
     case double(Double)

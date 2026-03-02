@@ -74,4 +74,16 @@ public extension QQMusicClient {
             "song_ids": songIds,
         ])
     }
+
+    /// 收藏歌单
+    /// - Parameter songlistId: 歌单 ID
+    func collectSonglist(songlistId: Int) async throws -> JSON {
+        try await request("/songlist/collect", params: ["songlist_id": String(songlistId)])
+    }
+
+    /// 取消收藏歌单
+    /// - Parameter songlistId: 歌单 ID
+    func uncollectSonglist(songlistId: Int) async throws -> JSON {
+        try await request("/songlist/uncollect", params: ["songlist_id": String(songlistId)])
+    }
 }

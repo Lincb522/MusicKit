@@ -139,4 +139,16 @@ public extension QQMusicClient {
     func songFavCount(songIds: String) async throws -> JSON {
         try await request("/song/get_fav_num", params: ["songid": songIds])
     }
+
+    /// 收藏（红心）歌曲
+    /// - Parameter songIds: 歌曲 ID 列表，逗号分隔
+    func collectSong(songIds: String) async throws -> JSON {
+        try await request("/song/collect_song", params: ["song_ids": songIds])
+    }
+
+    /// 取消收藏歌曲
+    /// - Parameter songIds: 歌曲 ID 列表，逗号分隔
+    func uncollectSong(songIds: String) async throws -> JSON {
+        try await request("/song/uncollect_song", params: ["song_ids": songIds])
+    }
 }
