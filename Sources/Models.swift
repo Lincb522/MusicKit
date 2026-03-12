@@ -215,6 +215,8 @@ public struct PhoneSendStatus: Decodable, Sendable {
 public struct LyricResult: Decodable, Sendable {
     /// 原文歌词
     public let lyric: String?
+    /// QRC 逐字歌词
+    public let qrc: String?
     /// 翻译歌词
     public let trans: String?
     /// 罗马音歌词
@@ -224,6 +226,8 @@ public struct LyricResult: Decodable, Sendable {
     public var hasLyric: Bool { lyric != nil && !(lyric?.isEmpty ?? true) }
     /// 是否有翻译
     public var hasTranslation: Bool { trans != nil && !(trans?.isEmpty ?? true) }
+    /// 是否有逐字歌词
+    public var hasQRC: Bool { qrc != nil && !(qrc?.isEmpty ?? true) }
 }
 
 // MARK: - 枚举
