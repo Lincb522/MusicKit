@@ -19,6 +19,9 @@ public final class QQMusicClient: @unchecked Sendable {
     /// 服务器地址
     public let baseURL: URL
 
+    /// API 访问令牌
+    public var apiToken: String?
+
     /// 请求超时时间（秒）
     public let timeout: TimeInterval
 
@@ -120,8 +123,12 @@ public final class QQMusicClient: @unchecked Sendable {
             throw QQMusicError.invalidURL(path)
         }
 
-        if !params.isEmpty {
-            components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        var allParams = params
+        if let token = apiToken, !token.isEmpty {
+            allParams["token"] = token
+        }
+        if !allParams.isEmpty {
+            components.queryItems = allParams.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
 
         guard let url = components.url else {
