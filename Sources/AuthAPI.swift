@@ -67,7 +67,7 @@ public extension QQMusicClient {
             try await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
         }
 
-        return QRCodeStatus(status: "TIMEOUT", musicid: nil)
+        return QRCodeStatus(status: "TIMEOUT", musicid: nil, musickey: nil, account: nil, nickname: nil, avatar: nil, is_vip: nil, is_svip: nil, euin: nil, loginType: nil)
     }
 
     /// 发送手机验证码

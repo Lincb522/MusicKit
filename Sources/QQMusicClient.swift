@@ -22,6 +22,18 @@ public final class QQMusicClient: @unchecked Sendable {
     /// API 访问令牌
     public var apiToken: String?
 
+    /// 用户 musicId（传递给服务端用于身份识别）
+    public var musicId: Int?
+
+    /// 用户 musicKey（传递给服务端用于鉴权）
+    public var musicKey: String?
+
+    /// 用户 encrypt_uin（传递给服务端用于查询用户资料）
+    public var encryptUin: String?
+
+    /// 登录类型（1=微信, 2=QQ）
+    public var loginType: Int?
+
     /// 请求超时时间（秒）
     public let timeout: TimeInterval
 
@@ -84,7 +96,7 @@ public final class QQMusicClient: @unchecked Sendable {
 
     // MARK: - 网络请求
 
-    /// 发送 GET 请求并解码响应
+    /// 发送 GET 请求并解码响应（用于专用路由，如 /auth/*, /login/*, /song/qualities）
     /// - Parameters:
     ///   - path: 请求路径
     ///   - params: 查询参数
@@ -108,10 +120,36 @@ public final class QQMusicClient: @unchecked Sendable {
         return result
     }
 
+    /// 发送 GET 请求并解码通用路由响应（/{module}/{func} 返回 {"result": T, "source": "..."}）
+    public func requestWrapped<T: Decodable>(_ path: String, params: [String: String] = [:]) async throws -> T {
+        let data = try await rawRequest(path, params: params)
+        let response = try JSONDecoder().decode(APIResponse<WrappedData<T>>.self, from: data)
+
+        guard response.code == 200 else {
+            throw QQMusicError.apiError(
+                code: response.code,
+                message: response.message,
+                errors: response.errors
+            )
+        }
+
+        guard let wrapped = response.data else {
+            throw QQMusicError.emptyData
+        }
+
+        return wrapped.result
+    }
+
     /// 发送 GET 请求，返回原始 APIResponse
     func requestRaw(_ path: String, params: [String: String] = [:]) async throws -> APIResponse<JSON> {
         let data = try await rawRequest(path, params: params)
         return try JSONDecoder().decode(APIResponse<JSON>.self, from: data)
+    }
+
+    /// 发送 GET 请求，解码通用路由响应并返回原始 APIResponse（含 source）
+    func requestRawWrapped(_ path: String, params: [String: String] = [:]) async throws -> APIResponse<WrappedData<JSON>> {
+        let data = try await rawRequest(path, params: params)
+        return try JSONDecoder().decode(APIResponse<WrappedData<JSON>>.self, from: data)
     }
 
     /// 底层请求方法（带重试）
@@ -126,6 +164,18 @@ public final class QQMusicClient: @unchecked Sendable {
         var allParams = params
         if let token = apiToken, !token.isEmpty {
             allParams["token"] = token
+        }
+        if let mid = musicId {
+            allParams["_musicid"] = String(mid)
+        }
+        if let mkey = musicKey, !mkey.isEmpty {
+            allParams["_musickey"] = mkey
+        }
+        if let euin = encryptUin, !euin.isEmpty {
+            allParams["_euin"] = euin
+        }
+        if let lt = loginType {
+            allParams["_login_type"] = String(lt)
         }
         if !allParams.isEmpty {
             components.queryItems = allParams.map { URLQueryItem(name: $0.key, value: $0.value) }

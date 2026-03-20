@@ -16,6 +16,14 @@ public struct APIResponse<T: Decodable>: Decodable {
     public let timestamp: Int?
 }
 
+/// 通用 API 路由的包装层（/{module}/{func} 返回 {"result": T, "source": "..."}）
+public struct WrappedData<T: Decodable>: Decodable {
+    /// 实际业务数据
+    public let result: T
+    /// 数据来源: "client" / "server" / "server_fallback"
+    public let source: String
+}
+
 // MARK: - 错误
 
 /// QQ音乐 API 错误
@@ -146,13 +154,34 @@ public struct AuthStatus: Decodable, Sendable {
     public let loggedIn: Bool
     /// 音乐 ID
     public let musicid: Int?
+    /// 音乐密钥（客户端凭证验证时返回）
+    public let musickey: String?
     /// 登录类型
     public let loginType: Int?
+    /// 当前活跃账号名
+    public let account: String?
+    /// 用户昵称
+    public let nickname: String?
+    /// 用户头像 URL
+    public let avatar: String?
+    /// encrypt_uin
+    public let euin: String?
+    /// 是否 VIP
+    public let isVip: Int?
+    /// 是否 SVIP
+    public let isSvip: Int?
 
     enum CodingKeys: String, CodingKey {
         case loggedIn = "logged_in"
         case musicid
+        case musickey
         case loginType = "login_type"
+        case account
+        case nickname
+        case avatar
+        case euin
+        case isVip = "is_vip"
+        case isSvip = "is_svip"
     }
 }
 
@@ -177,10 +206,22 @@ public struct QRCode: Decodable, Sendable {
 
 /// 二维码扫码状态
 public struct QRCodeStatus: Decodable, Sendable {
-    /// 状态字符串：SCAN / CONF / DONE / TIMEOUT / REFUSE
     public let status: String
-    /// 登录成功时返回的 musicid
     public let musicid: Int?
+    public let musickey: String?
+    public let account: String?
+    public let nickname: String?
+    public let avatar: String?
+    public let is_vip: Int?
+    public let is_svip: Int?
+    public let euin: String?
+    public let loginType: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case status, musicid, musickey, account, nickname, avatar
+        case is_vip, is_svip, euin
+        case loginType = "login_type"
+    }
 
     /// 等待扫码
     public var isScan: Bool { status == "SCAN" }
@@ -212,7 +253,7 @@ public struct PhoneSendStatus: Decodable, Sendable {
 // MARK: - 歌词模型
 
 /// 歌词结果
-public struct LyricResult: Decodable, Sendable {
+public struct LyricResult: Sendable {
     /// 原文歌词
     public let lyric: String?
     /// QRC 逐字歌词
@@ -230,30 +271,56 @@ public struct LyricResult: Decodable, Sendable {
     public var hasQRC: Bool { qrc != nil && !(qrc?.isEmpty ?? true) }
 }
 
+extension LyricResult: Decodable {
+    enum CodingKeys: String, CodingKey {
+        case lyric, qrc, trans, roma
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        lyric = Self.decodeStringOrNil(container: container, key: .lyric)
+        qrc = Self.decodeStringOrNil(container: container, key: .qrc)
+        trans = Self.decodeStringOrNil(container: container, key: .trans)
+        roma = Self.decodeStringOrNil(container: container, key: .roma)
+    }
+
+    private static func decodeStringOrNil(container: KeyedDecodingContainer<CodingKeys>, key: CodingKeys) -> String? {
+        if let str = try? container.decode(String.self, forKey: key), !str.isEmpty {
+            return str
+        }
+        return nil
+    }
+}
+
 // MARK: - 枚举
 
 /// 二维码登录类型
 public enum QRLoginType: String, Sendable {
     case qq = "qq"
     case wx = "wx"
+    case mobile = "mobile"
 }
 
-/// 搜索类型
+/// 搜索类型（rawValue 为枚举名称，服务端 parser 按名称匹配到整数值）
 public enum SearchType: String, Sendable {
-    /// 歌曲
+    /// 歌曲 (0)
     case song = "SONG"
-    /// 歌手
+    /// 歌手 (1)
     case singer = "SINGER"
-    /// 专辑
+    /// 专辑 (2)
     case album = "ALBUM"
-    /// 歌单
+    /// 歌单 (3)
     case songlist = "SONGLIST"
-    /// MV
+    /// MV (4)
     case mv = "MV"
-    /// 歌词
+    /// 歌词 (7)
     case lyric = "LYRIC"
-    /// 用户
+    /// 用户 (8)
     case user = "USER"
+    /// 节目专辑 (15)
+    case audioAlbum = "AUDIO_ALBUM"
+    /// 节目 (18)
+    case audio = "AUDIO"
 }
 
 /// 歌曲文件类型
@@ -264,6 +331,10 @@ public enum SongFileType: String, Sendable, CaseIterable {
     case atmos2 = "ATMOS_2"
     /// 臻品音质 16Bit 44.1kHz
     case atmos51 = "ATMOS_51"
+    /// 杜比全景声
+    case dolby = "DOLBY"
+    /// 黑胶
+    case vinyl = "VINYL"
     /// FLAC 无损 16Bit~24Bit
     case flac = "FLAC"
     /// OGG 640kbps
@@ -291,6 +362,8 @@ public enum SongFileType: String, Sendable, CaseIterable {
         case .master:  return "臻品母带 (24Bit 192kHz)"
         case .atmos2:  return "臻品全景声"
         case .atmos51: return "臻品音质"
+        case .dolby:   return "杜比全景声"
+        case .vinyl:   return "黑胶"
         case .flac:    return "FLAC 无损"
         case .ogg640:  return "OGG 640kbps"
         case .ogg320:  return "OGG 320kbps"
@@ -306,7 +379,7 @@ public enum SongFileType: String, Sendable, CaseIterable {
 
     /// 常用音质选项（供 UI 选择器使用）
     public static var commonOptions: [SongFileType] {
-        [.master, .flac, .ogg320, .mp3_320, .mp3_128, .aac96]
+        [.master, .dolby, .vinyl, .flac, .ogg320, .mp3_320, .mp3_128, .aac96]
     }
 }
 
@@ -370,26 +443,26 @@ public enum SexType: String, Sendable {
     case group = "GROUP"
 }
 
-/// 歌手 Tab 类型
+/// 歌手 Tab 类型（rawValue 为服务端 TabType 枚举名称）
 public enum SingerTabType: String, Sendable {
     /// 百科
-    case wiki = "wiki"
+    case wiki = "WIKI"
     /// 演唱歌曲
-    case song = "song_sing"
+    case song = "SONG"
     /// 专辑
-    case album = "album"
+    case album = "ALBUM"
     /// 作曲
-    case composer = "song_composing"
+    case composer = "COMPOSER"
     /// 作词
-    case lyricist = "song_lyric"
+    case lyricist = "LYRICIST"
     /// 制作人
-    case producer = "producer"
+    case producer = "PRODUCER"
     /// 编曲
-    case arranger = "arranger"
+    case arranger = "ARRANGER"
     /// 乐手
-    case musician = "musician"
+    case musician = "MUSICIAN"
     /// 视频
-    case video = "video"
+    case video = "VIDEO"
 }
 
 /// 歌手风格
@@ -397,10 +470,15 @@ public enum GenreType: String, Sendable {
     case all = "ALL"
     case pop = "POP"
     case rap = "RAP"
+    case chineseStyle = "CHINESE_STYLE"
     case rock = "ROCK"
     case electronic = "ELECTRONIC"
     case folk = "FOLK"
     case rnb = "R_AND_B"
+    case ethnic = "ETHNIC"
+    case lightMusic = "LIGHT_MUSIC"
     case jazz = "JAZZ"
     case classical = "CLASSICAL"
+    case country = "COUNTRY"
+    case blues = "BLUES"
 }

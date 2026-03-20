@@ -20,7 +20,7 @@ public extension QQMusicClient {
         onlySong: Bool = false,
         tag: Bool = true
     ) async throws -> JSON {
-        try await request("/songlist/get_detail", params: [
+        try await requestWrapped("/songlist/get_detail", params: [
             "songlist_id": String(songlistId),
             "dirid": String(dirid),
             "num": String(num),
@@ -30,27 +30,16 @@ public extension QQMusicClient {
         ])
     }
 
-    /// 获取歌单全部歌曲
-    /// - Parameters:
-    ///   - songlistId: 歌单 ID
-    ///   - dirid: 歌单 dirid
-    func songlistAllSongs(songlistId: Int, dirid: Int = 0) async throws -> JSON {
-        try await request("/songlist/get_songlist", params: [
-            "songlist_id": String(songlistId),
-            "dirid": String(dirid),
-        ])
-    }
-
     /// 创建歌单（需要登录）
     /// - Parameter name: 歌单名称
     func createSonglist(name: String) async throws -> JSON {
-        try await request("/songlist/create", params: ["dirname": name])
+        try await requestWrapped("/songlist/create", params: ["dirname": name])
     }
 
     /// 删除歌单（需要登录）
     /// - Parameter dirid: 歌单 dirid
     func deleteSonglist(dirid: Int) async throws -> JSON {
-        try await request("/songlist/delete", params: ["dirid": String(dirid)])
+        try await requestWrapped("/songlist/delete", params: ["dirid": String(dirid)])
     }
 
     /// 添加歌曲到歌单（需要登录）
@@ -58,7 +47,7 @@ public extension QQMusicClient {
     ///   - dirid: 歌单 dirid
     ///   - songIds: 歌曲 ID 列表，逗号分隔
     func addSongsToSonglist(dirid: Int, songIds: String) async throws -> JSON {
-        try await request("/songlist/add_songs", params: [
+        try await requestWrapped("/songlist/add_songs", params: [
             "dirid": String(dirid),
             "song_ids": songIds,
         ])
@@ -69,21 +58,9 @@ public extension QQMusicClient {
     ///   - dirid: 歌单 dirid
     ///   - songIds: 歌曲 ID 列表，逗号分隔
     func deleteSongsFromSonglist(dirid: Int, songIds: String) async throws -> JSON {
-        try await request("/songlist/del_songs", params: [
+        try await requestWrapped("/songlist/del_songs", params: [
             "dirid": String(dirid),
             "song_ids": songIds,
         ])
-    }
-
-    /// 收藏歌单
-    /// - Parameter songlistId: 歌单 ID
-    func collectSonglist(songlistId: Int) async throws -> JSON {
-        try await request("/songlist/collect", params: ["songlist_id": String(songlistId)])
-    }
-
-    /// 取消收藏歌单
-    /// - Parameter songlistId: 歌单 ID
-    func uncollectSonglist(songlistId: Int) async throws -> JSON {
-        try await request("/songlist/uncollect", params: ["songlist_id": String(songlistId)])
     }
 }

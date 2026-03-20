@@ -22,7 +22,7 @@ public extension QQMusicClient {
         trans: Bool = false,
         roma: Bool = false
     ) async throws -> LyricResult {
-        try await request("/lyric/get_lyric", params: [
+        try await requestWrapped("/lyric/get_lyric", params: [
             "value": value,
             "qrc": String(qrc),
             "trans": String(trans),

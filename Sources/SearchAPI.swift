@@ -6,19 +6,19 @@ public extension QQMusicClient {
 
     /// 获取热搜词
     func hotkey() async throws -> JSON {
-        try await request("/search/hotkey")
+        try await requestWrapped("/search/get_hotkey")
     }
 
     /// 搜索补全
     /// - Parameter keyword: 关键词
     func searchComplete(keyword: String) async throws -> JSON {
-        try await request("/search/complete", params: ["keyword": keyword])
+        try await requestWrapped("/search/complete", params: ["keyword": keyword])
     }
 
     /// 快速搜索
     /// - Parameter keyword: 关键词
     func quickSearch(keyword: String) async throws -> JSON {
-        try await request("/search/quick_search", params: ["keyword": keyword])
+        try await requestWrapped("/search/quick_search", params: ["keyword": keyword])
     }
 
     /// 综合搜索
@@ -27,7 +27,7 @@ public extension QQMusicClient {
     ///   - page: 页码，默认 1
     ///   - highlight: 是否高亮关键词
     func generalSearch(keyword: String, page: Int = 1, highlight: Bool = true) async throws -> JSON {
-        try await request("/search/general_search", params: [
+        try await requestWrapped("/search/general_search", params: [
             "keyword": keyword,
             "page": String(page),
             "highlight": String(highlight),
@@ -52,8 +52,8 @@ public extension QQMusicClient {
         num: Int = 10,
         page: Int = 1,
         highlight: Bool = true
-    ) async throws -> [JSON] {
-        try await request("/search/search_by_type", params: [
+    ) async throws -> JSON {
+        try await requestWrapped("/search/search_by_type", params: [
             "keyword": keyword,
             "search_type": type.rawValue,
             "num": String(num),

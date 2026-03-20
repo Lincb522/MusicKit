@@ -7,7 +7,7 @@ public extension QQMusicClient {
     /// 获取歌曲评论数量
     /// - Parameter bizId: 歌曲 ID
     func commentCount(bizId: String) async throws -> JSON {
-        try await request("/comment/get_comment_count", params: ["biz_id": bizId])
+        try await requestWrapped("/comment/get_comment_count", params: ["biz_id": bizId])
     }
 
     /// 获取歌曲热评
@@ -22,7 +22,7 @@ public extension QQMusicClient {
         pageSize: Int = 15,
         lastSeqNo: String = ""
     ) async throws -> JSON {
-        try await request("/comment/get_hot_comments", params: [
+        try await requestWrapped("/comment/get_hot_comments", params: [
             "biz_id": bizId,
             "page_num": String(pageNum),
             "page_size": String(pageSize),
@@ -42,7 +42,7 @@ public extension QQMusicClient {
         pageSize: Int = 15,
         lastSeqNo: String = ""
     ) async throws -> JSON {
-        try await request("/comment/get_new_comments", params: [
+        try await requestWrapped("/comment/get_new_comments", params: [
             "biz_id": bizId,
             "page_num": String(pageNum),
             "page_size": String(pageSize),
@@ -62,7 +62,7 @@ public extension QQMusicClient {
         pageSize: Int = 15,
         lastSeqNo: String = ""
     ) async throws -> JSON {
-        try await request("/comment/get_recommend_comments", params: [
+        try await requestWrapped("/comment/get_recommend_comments", params: [
             "biz_id": bizId,
             "page_num": String(pageNum),
             "page_size": String(pageSize),
@@ -80,7 +80,7 @@ public extension QQMusicClient {
         pageSize: Int = 15,
         lastSeqNo: String = ""
     ) async throws -> JSON {
-        try await request("/comment/get_moment_comments", params: [
+        try await requestWrapped("/comment/get_moment_comments", params: [
             "biz_id": bizId,
             "page_size": String(pageSize),
             "last_comment_seq_no": lastSeqNo,
