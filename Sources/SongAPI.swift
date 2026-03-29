@@ -83,6 +83,29 @@ public extension QQMusicClient {
         return result[mid]
     }
 
+    /// 获取单首歌曲下载链接（带 _download=1，走解密下载通道）
+    /// - Parameters:
+    ///   - mid: 歌曲 mid
+    ///   - fileType: 文件类型
+    /// - Returns: [url, ekey] 结构，ekey 可用于本地 QMC 解密
+    func downloadSongURL(mid: String, fileType: SongFileType = .mp3_128) async throws -> EncryptedSongURL? {
+        let raw: [String: JSON] = try await requestWrapped("/song/get_song_urls", params: [
+            "mid": mid,
+            "file_type": fileType.rawValue,
+            "_download": "1",
+        ])
+        guard let value = raw[mid] else { return nil }
+        if let arr = value.arrayValue, arr.count >= 2,
+           let url = arr[0].stringValue, let ekey = arr[1].stringValue,
+           !url.isEmpty {
+            return EncryptedSongURL(url: url, ekey: ekey)
+        }
+        if let url = value.stringValue, !url.isEmpty {
+            return EncryptedSongURL(url: url, ekey: "")
+        }
+        return nil
+    }
+
     /// 获取试听链接
     /// - Parameters:
     ///   - mid: 歌曲 mid
